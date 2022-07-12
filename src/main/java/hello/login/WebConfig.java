@@ -2,33 +2,50 @@ package hello.login;
 
 import hello.login.web.filter.LogFilter;
 import hello.login.web.filter.LoginCheckFilter;
+import hello.login.web.interceptor.LogInterceptor;
+import hello.login.web.interceptor.LoginCheckInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
 
 @Configuration
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public FilterRegistrationBean logFilter() {
-        FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new LogFilter());
-        filterRegistrationBean.setOrder(1); // LogFilter 필터가 첫번째로 실행
-        filterRegistrationBean.addUrlPatterns("/*");
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LogInterceptor())
+                .order(1)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/css/**", "/*.ico", "/error");
 
-        return filterRegistrationBean;
+        registry.addInterceptor(new LoginCheckInterceptor())
+                .order(2)
+                .addPathPatterns("/**")
+                .excludePathPatterns("/", "/members/add", "/login", "logout", "/css/**", "/*.ico", "/error");
     }
 
-    @Bean
-    public FilterRegistrationBean loginCheckFilter() {
-        final FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
-        filterRegistrationBean.setFilter(new LoginCheckFilter());
-        filterRegistrationBean.setOrder(2); // LoginCheckFilter 필터가 두번째로 실행
-        filterRegistrationBean.addUrlPatterns("/*");
-
-        return filterRegistrationBean;
-    }
+//    @Bean
+//    public FilterRegistrationBean logFilter() {
+//        FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
+//        filterRegistrationBean.setFilter(new LogFilter());
+//        filterRegistrationBean.setOrder(1); // LogFilter 필터가 첫번째로 실행
+//        filterRegistrationBean.addUrlPatterns("/*");
+//
+//        return filterRegistrationBean;
+//    }
+//
+//    @Bean
+//    public FilterRegistrationBean loginCheckFilter() {
+//        final FilterRegistrationBean<Filter> filterRegistrationBean = new FilterRegistrationBean<>();
+//        filterRegistrationBean.setFilter(new LoginCheckFilter());
+//        filterRegistrationBean.setOrder(2); // LoginCheckFilter 필터가 두번째로 실행
+//        filterRegistrationBean.addUrlPatterns("/*");
+//
+//        return filterRegistrationBean;
+//    }
 }
